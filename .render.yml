@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: Vikasitha_Backend
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+
+
