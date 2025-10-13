@@ -4,6 +4,7 @@ import com.example.demo.Model.MemberBilling;
 import com.example.demo.Model.Payment;
 import com.example.demo.Model.Transaction;
 import com.example.demo.Repository.TransactionRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -62,40 +63,64 @@ public class TransactionService {
         transactionRepository.save(t);
     }
 
-    // ✅ Fetch all transactions for member, including late fee
+    // ✅ Fetch all transactions for member (used in frontend)
     public List<Transaction> getByMemberId(String memberId) {
-        List<Transaction> transactions = transactionRepository.findByMemberIdOrderByDateAsc(memberId);
+        return transactionRepository.findByMemberIdOrderByDateAsc(memberId);
+    }
 
-        if (transactions.isEmpty()) {
-            return transactions;
+    // ✅ Main late fee logic (run once on Feb 28 or 30th of other months)
+    @Scheduled(cron = "0 0 23 * * ?") // runs daily at 11 PM
+    public void applyMonthlyLateFees() {
+        LocalDate today = LocalDate.now();
+        int day = today.getDayOfMonth();
+        int month = today.getMonthValue();
+
+        boolean isFeeDay = (month == 2 && day == 28) || (month != 2 && day == 30);
+
+        if (!isFeeDay) {
+            System.out.println("ℹ️ Not a late fee day (" + today + "). Skipping late fee generation.");
+            return;
         }
 
-        // Get latest transaction (last in the list)
-        Transaction latestTxn = transactions.get(transactions.size() - 1);
+        System.out.println("✅ Applying late payment fees for date: " + today);
 
-        // If latest is a Bill and unpaid > 30 days → apply late fee
-        if (latestTxn.getDescription().startsWith("Bill") && latestTxn.getBalance() > 0) {
-            LocalDate billDate = latestTxn.getDate();
-            LocalDate today = LocalDate.now();
+        List<Transaction> allTransactions = transactionRepository.findAll();
+        allTransactions.stream()
+                .map(Transaction::getMemberId)
+                .distinct()
+                .forEach(memberId -> applyLateFeeForMember(memberId, today));
+    }
 
-            long diffInDays = ChronoUnit.DAYS.between(billDate, today);
-            if (diffInDays > 30) {
-                double lateFee = latestTxn.getBalance() * 0.05; // 5% of unpaid balance
-                double newBalance = latestTxn.getBalance() + lateFee;
+    // ✅ Helper: Apply 5% late fee to a member if balance > 0
+    private void applyLateFeeForMember(String memberId, LocalDate today) {
+        List<Transaction> memberTxns = transactionRepository.findByMemberIdOrderByDateAsc(memberId);
+        if (memberTxns.isEmpty()) return;
 
-                Transaction lateFeeTxn = new Transaction();
-                lateFeeTxn.setMemberId(memberId);
-                lateFeeTxn.setDate(today);
-                lateFeeTxn.setDescription("Late Payment Fee");
-                lateFeeTxn.setDebit(lateFee);
-                lateFeeTxn.setCredit(0);
-                lateFeeTxn.setBalance(newBalance);
+        Transaction latestTxn = memberTxns.get(memberTxns.size() - 1);
+        if (latestTxn.getBalance() <= 0) return;
 
-                transactionRepository.save(lateFeeTxn);
-                transactions.add(lateFeeTxn);
-            }
-        }
+        // Check if last bill older than 30 days
+        LocalDate lastBillDate = latestTxn.getDate();
+        long diffDays = ChronoUnit.DAYS.between(lastBillDate, today);
+        if (diffDays < 30) return;
 
-        return transactions;
+        double lateFee = latestTxn.getBalance() * 0.05;
+        double newBalance = latestTxn.getBalance() + lateFee;
+
+        Transaction lateFeeTxn = new Transaction();
+        lateFeeTxn.setMemberId(memberId);
+        lateFeeTxn.setDate(today);
+        lateFeeTxn.setDescription("Late Payment Fee");
+        lateFeeTxn.setDebit(lateFee);
+        lateFeeTxn.setCredit(0);
+        lateFeeTxn.setBalance(newBalance);
+        lateFeeTxn.setFixCharge(0);
+        lateFeeTxn.setUnit(0);
+        lateFeeTxn.setMonthUnit(0);
+        lateFeeTxn.setMeterReadingThisMonth(0);
+        lateFeeTxn.setMeterReadingRemain(0);
+
+        transactionRepository.save(lateFeeTxn);
+        System.out.println("💰 Late fee of " + lateFee + " applied for member " + memberId);
     }
 }

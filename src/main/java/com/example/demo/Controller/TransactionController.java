@@ -2,6 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Model.Transaction;
 import com.example.demo.Service.TransactionService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,5 +22,12 @@ public class TransactionController {
     @GetMapping("/member/{memberId}")
     public List<Transaction> getTransactionsByMemberId(@PathVariable String memberId) {
         return transactionService.getByMemberId(memberId);
+    }
+
+    // 🔹 Optional: Trigger late fee manually (for testing or admin)
+    @PostMapping("/applyLateFees")
+    public ResponseEntity<String> applyLateFees() {
+        transactionService.applyMonthlyLateFees();
+        return ResponseEntity.ok("Late fees applied successfully if conditions matched.");
     }
 }
