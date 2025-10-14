@@ -69,13 +69,13 @@ public class TransactionService {
     }
 
     // ✅ Main late fee logic (run once on Feb 28 or 30th of other months)
-    @Scheduled(cron = "0 0 23 * * ?") // runs daily at 11 PM
+    @Scheduled(cron = "0 10 10 * * ?") // runs daily at 10:10 AM
     public void applyMonthlyLateFees() {
         LocalDate today = LocalDate.now();
         int day = today.getDayOfMonth();
         int month = today.getMonthValue();
 
-        boolean isFeeDay = (month == 2 && day == 28) || (month != 2 && day == 30);
+        boolean isFeeDay = (month == 2 && day == 28) || (month != 2 && day == 14);
 
         if (!isFeeDay) {
             System.out.println("ℹ️ Not a late fee day (" + today + "). Skipping late fee generation.");
