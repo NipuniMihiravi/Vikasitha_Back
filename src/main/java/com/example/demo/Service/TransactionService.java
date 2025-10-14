@@ -69,7 +69,8 @@ public class TransactionService {
     }
 
     // ✅ Main late fee logic (run once on Feb 28 or 30th of other months)
-    @Scheduled(cron = "0 10 10 * * ?") // runs daily at 10:10 AM
+    @Scheduled(cron = "0 10 10 25 * ?", zone = "Asia/Colombo")
+    // runs daily at 10:10 AM
     public void applyMonthlyLateFees() {
         LocalDate today = LocalDate.now();
         int day = today.getDayOfMonth();
