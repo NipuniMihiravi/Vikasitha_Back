@@ -5,5 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface MaintenancePaymentRepository extends MongoRepository<MaintenancePayment, String> {
-    List<MaintenancePayment> findByMaintenanceId(String maintenanceId);
+    List<MaintenancePayment> findByMemberId(String memberId);
 }

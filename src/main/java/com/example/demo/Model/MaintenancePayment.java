@@ -9,13 +9,13 @@ public class MaintenancePayment {
     @Id
     private String id;
 
-    private String maintenanceId; // link to Maintenance
+    private String memberId; // link to Maintenance
     private double amount;
     private LocalDate date;
 
-    public MaintenancePayment(String id, String maintenanceId, double amount, LocalDate date) {
+    public MaintenancePayment(String id, String memberId, double amount, LocalDate date) {
         this.id = id;
-        this.maintenanceId = maintenanceId;
+        this.memberId = memberId;
         this.amount = amount;
         this.date = date;
     }
@@ -28,12 +28,12 @@ public class MaintenancePayment {
         this.id = id;
     }
 
-    public String getMaintenanceId() {
-        return maintenanceId;
+    public String getMemberId() {
+        return memberId;
     }
 
-    public void setMaintenanceId(String maintenanceId) {
-        this.maintenanceId = maintenanceId;
+    public void setMemberId(String maintenanceId) {
+        this.memberId = maintenanceId;
     }
 
     public double getAmount() {

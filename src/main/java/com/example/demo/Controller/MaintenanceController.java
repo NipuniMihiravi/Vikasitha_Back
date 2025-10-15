@@ -42,6 +42,14 @@ public class MaintenanceController {
         return maintenanceService.getMaintenanceById(id);
     }
 
+    @PutMapping("/{id}")
+    public Maintenance updateMaintenance(
+            @PathVariable String id,
+            @RequestBody Maintenance updatedMaintenance
+    ) {
+        return maintenanceService.updateMaintenance(id, updatedMaintenance);
+    }
+
     // 🗑️ Delete maintenance
     @DeleteMapping("/{id}")
     public String deleteMaintenance(@PathVariable String id) {

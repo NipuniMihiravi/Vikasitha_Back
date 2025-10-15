@@ -32,15 +32,23 @@ public class MaintenancePaymentController {
     }
 
     // ✅ Get all payments for a specific maintenance record
-    @GetMapping("/maintenance/{maintenanceId}")
-    public List<MaintenancePayment> getPaymentsByMaintenanceId(@PathVariable String maintenanceId) {
-        return maintenancePaymentService.getPaymentsByMaintenanceId(maintenanceId);
+    @GetMapping("/maintenance/{memberId}")
+    public List<MaintenancePayment> getPaymentsByMaintenanceId(@PathVariable String memberId) {
+        return maintenancePaymentService.getPaymentsByMemberId(memberId);
     }
 
     // 🔍 Get single payment
     @GetMapping("/{id}")
     public Optional<MaintenancePayment> getPaymentById(@PathVariable String id) {
         return maintenancePaymentService.getPaymentById(id);
+    }
+
+    @PutMapping("/{id}")
+    public MaintenancePayment updatePayment(
+            @PathVariable String id,
+            @RequestBody MaintenancePayment updatedPayment
+    ) {
+        return maintenancePaymentService.updatePayment(id, updatedPayment);
     }
 
     // 🗑️ Delete payment

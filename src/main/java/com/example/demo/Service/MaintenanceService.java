@@ -36,6 +36,31 @@ public class MaintenanceService {
         return maintenanceRepository.findById(id);
     }
 
+    public Maintenance updateMaintenance(String id, Maintenance updatedMaintenance) {
+        Optional<Maintenance> existingMaintenanceOpt = maintenanceRepository.findById(id);
+
+        if (existingMaintenanceOpt.isPresent()) {
+            Maintenance existingMaintenance = existingMaintenanceOpt.get();
+
+            // Update fields
+            existingMaintenance.setMemberId(updatedMaintenance.getMemberId());
+            existingMaintenance.setMemberName(updatedMaintenance.getMemberName());
+            existingMaintenance.setAddress(updatedMaintenance.getAddress());
+            existingMaintenance.setMaintenanceName(updatedMaintenance.getMaintenanceName());
+            existingMaintenance.setCost(updatedMaintenance.getCost());
+            existingMaintenance.setDate(updatedMaintenance.getDate());
+            existingMaintenance.setDescription(updatedMaintenance.getDescription());
+            existingMaintenance.setDoneBy(updatedMaintenance.getDoneBy());
+
+            return maintenanceRepository.save(existingMaintenance);
+        } else {
+            throw new RuntimeException("Maintenance record not found with id: " + id);
+        }
+    }
+
+
+
+
     // 🗑️ Delete maintenance record
     public void deleteMaintenance(String id) {
         maintenanceRepository.deleteById(id);

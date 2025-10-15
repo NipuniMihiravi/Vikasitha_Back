@@ -27,13 +27,26 @@ public class MaintenancePaymentService {
     }
 
     // 🔍 Get payments by Maintenance ID
-    public List<MaintenancePayment> getPaymentsByMaintenanceId(String maintenanceId) {
-        return maintenancePaymentRepository.findByMaintenanceId(maintenanceId);
+    public List<MaintenancePayment> getPaymentsByMemberId(String memberId) {
+        return maintenancePaymentRepository.findByMemberId(memberId);
     }
 
     // 🔍 Get single payment by ID
     public Optional<MaintenancePayment> getPaymentById(String id) {
         return maintenancePaymentRepository.findById(id);
+    }
+
+    public MaintenancePayment updatePayment(String id, MaintenancePayment updatedPayment) {
+        Optional<MaintenancePayment> existingPaymentOpt = maintenancePaymentRepository.findById(id);
+        if (existingPaymentOpt.isPresent()) {
+            MaintenancePayment existingPayment = existingPaymentOpt.get();
+            existingPayment.setAmount(updatedPayment.getAmount());
+            existingPayment.setDate(updatedPayment.getDate());
+            existingPayment.setMemberId(updatedPayment.getMemberId());
+            return maintenancePaymentRepository.save(existingPayment);
+        } else {
+            throw new RuntimeException("Payment not found with id: " + id);
+        }
     }
 
     // 🗑️ Delete payment record
